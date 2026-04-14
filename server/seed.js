@@ -130,31 +130,8 @@ const seedPlayers = [
 const seedSessions = [];
 
 function seed() {
-  const playerCount = db.prepare('SELECT COUNT(*) as count FROM players').get();
-
-  if (playerCount.count > 0) {
-    console.log('Database already seeded, skipping...');
-    return;
-  }
-
-  console.log('Seeding database with demo data...');
-
-  const insertPlayer = db.prepare(
-    'INSERT INTO players (name, skill_level, variant, availability, notes) VALUES (?, ?, ?, ?, ?)'
-  );
-
-  db.exec('BEGIN');
-  try {
-    seedPlayers.forEach(
-      (p) => insertPlayer.run(p.name, p.skill_level, p.variant, p.availability, p.notes)
-    );
-    db.exec('COMMIT');
-  } catch (err) {
-    db.exec('ROLLBACK');
-    throw err;
-  }
-
-  console.log(`Seeded ${seedPlayers.length} players. Sessions start empty.`);
+  // No demo data — all players and sessions are created by real users
+  console.log('Database ready.');
 }
 
 module.exports = { seed };
