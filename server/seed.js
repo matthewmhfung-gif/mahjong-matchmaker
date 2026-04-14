@@ -127,35 +127,7 @@ const seedPlayers = [
   },
 ];
 
-const seedSessions = [
-  {
-    title: 'Weekend Hong Kong Social',
-    date_time: '2026-04-18T14:00:00',
-    variant: 'Hong Kong',
-    skill_requirement: 'Intermediate',
-    max_players: 4,
-    location: 'Chinatown Community Center, Room 2B',
-    notes: 'Casual game, bring snacks!',
-  },
-  {
-    title: 'Riichi Friday Night',
-    date_time: '2026-04-17T19:00:00',
-    variant: 'Japanese Riichi',
-    skill_requirement: 'Advanced',
-    max_players: 4,
-    location: "Bob's apartment — 12 Maple St, Apt 4F",
-    notes: 'Serious game, Tenhou rules. BYO drinks.',
-  },
-  {
-    title: "Beginner's American Mahjong",
-    date_time: '2026-04-19T13:00:00',
-    variant: 'American',
-    skill_requirement: 'Beginner',
-    max_players: 4,
-    location: 'Sunnyvale Public Library, Meeting Room A',
-    notes: 'All skill levels welcome. We will go slow and explain rules as we go.',
-  },
-];
+const seedSessions = [];
 
 function seed() {
   const playerCount = db.prepare('SELECT COUNT(*) as count FROM players').get();
@@ -171,39 +143,18 @@ function seed() {
     'INSERT INTO players (name, skill_level, variant, availability, notes) VALUES (?, ?, ?, ?, ?)'
   );
 
-  const insertSession = db.prepare(
-    'INSERT INTO sessions (title, date_time, variant, skill_requirement, max_players, location, notes) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  );
-
-  const insertSessionPlayer = db.prepare(
-    'INSERT INTO session_players (session_id, player_id) VALUES (?, ?)'
-  );
-
   db.exec('BEGIN');
   try {
-    const playerIds = seedPlayers.map(
-      (p) => insertPlayer.run(p.name, p.skill_level, p.variant, p.availability, p.notes).lastInsertRowid
+    seedPlayers.forEach(
+      (p) => insertPlayer.run(p.name, p.skill_level, p.variant, p.availability, p.notes)
     );
-
-    const sessionIds = seedSessions.map(
-      (s) => insertSession.run(s.title, s.date_time, s.variant, s.skill_requirement, s.max_players, s.location || '', s.notes).lastInsertRowid
-    );
-
-    // Alice and Emma join the Hong Kong session
-    insertSessionPlayer.run(sessionIds[0], playerIds[0]);
-    insertSessionPlayer.run(sessionIds[0], playerIds[4]);
-    // Bob joins the Riichi session
-    insertSessionPlayer.run(sessionIds[1], playerIds[1]);
-    // Carol joins the Beginner session
-    insertSessionPlayer.run(sessionIds[2], playerIds[2]);
-
     db.exec('COMMIT');
   } catch (err) {
     db.exec('ROLLBACK');
     throw err;
   }
 
-  console.log(`Seeded ${seedPlayers.length} players and ${seedSessions.length} sessions.`);
+  console.log(`Seeded ${seedPlayers.length} players. Sessions start empty.`);
 }
 
 module.exports = { seed };
